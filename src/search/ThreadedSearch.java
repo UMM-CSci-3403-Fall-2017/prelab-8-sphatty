@@ -1,3 +1,6 @@
+// Jacob Sphatt
+
+
 package search;
 
 import java.util.ArrayList;
@@ -27,7 +30,14 @@ public class ThreadedSearch<T> implements Runnable {
   * You can assume that the list size is divisible by `numThreads`
   */
   public boolean parSearch(int numThreads, T target, ArrayList<T> list) throws InterruptedException {
-    /*
+   
+	  this.answer = new Answer();
+	  int searchPartSize = list.size()/numThreads;
+	  Runnable[] Bund = new Runnable[numThreads];
+	  Thread[] ArrayThread = new Thread[numThreads];
+	  
+	  
+	  /*
     * First construct an instance of the `Answer` inner class. This will
     * be how the threads you're about to create will "communicate". They
     * will all have access to this one shared instance of `Answer`, where
@@ -47,11 +57,40 @@ public class ThreadedSearch<T> implements Runnable {
     * threads, wait for them to all terminate, and then return the answer
     * in the shared `Answer` instance.
     */
-    return false;
-  }
+
+	  // creating threads
+	    for (int i = 0; i < numThreads; i++){
+	    	
+	      int startIndex = (i * searchPartSize);
+	      int endIndex = startIndex + searchPartSize;
+	      Bund[i] = new ThreadedSearch<T>(target, list, startIndex, endIndex, this.answer);
+	      ArrayThread[i] = new Thread(Bund[i]);
+	      ArrayThread[i].start();
+	      
+	    }
+
+	    for (int i = 0; i < numThreads; i++){
+	      ArrayThread[i].join();
+	    }
+
+	    // returns the correct answer
+	    return answer.getAnswer();
+	  }
 
   public void run() {
-
+	  // looking for a mtach
+	  for(int i = begin; i < end; i++){
+	      if (answer.getAnswer()){ 
+	        return; 
+	      } else{
+	    	  // finding a match when true
+	        if(list.get(i).equals(target)){
+	          answer.setAnswer(true);
+	          return; 
+	        }
+	      }
+	    }
+	  }
   }
 
   private class Answer {
